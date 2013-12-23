@@ -41,8 +41,8 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <string.h>
+	#include <ctype.h>
 	#include <sys/time.h>
-
 	// Taille des buffers
 	#define SBMAX	512	// Stack
 	#define	LBMAX	32	// Loopz
@@ -51,6 +51,12 @@
 	// Taille max réponse de l'interpréteur BF
 	#define	BFREP	128
 
+	//
+	#define _ARG_MAX_SIZE 20
+	#define _ARG_DELIMITER ';'
+	
+	#define _KW_MAX_SIZE 20
+	#define _KW_DELIMITER ' '
 	// Temps autorisé pour le watchdog
 	#define WATCHDOG 6
 	#define __TIME getMsTime()
@@ -82,12 +88,18 @@
 	#define _LOOP_SYMBOLE *(__LoopMain.stack + __LoopMain.ptr)
 		#define _LOOP_BUFFER __LoopMain.stack
 		#define _LOOP_PTR __LoopMain.ptr
+
+	#define FAST_STRCMP(x, y)  (*(x) != *(y) ? \
+		((unsigned char) *(x) - (unsigned char) *(y)) : \
+		strcmp((x), (y)))
 		
 	// Fonctions d'exécution
 	void _bf_Exec(__CONTEXT *context);
 	int _bf_GetFn(char mnemonic);
-	
+	char *getNextArg( char delimiter);
+	int isArgNext();
 	unsigned int getMsTime();
+	char *trim(char *s);
 	// Commandes BF
 	void NOP(__CONTEXT *context, int reserved);
 	void ISA(__CONTEXT *context, int reserved);
@@ -98,4 +110,9 @@
 	void EBK(__CONTEXT *context, int reserved);
 	void PRN(__CONTEXT *context, int reserved);
 	void GET(__CONTEXT *context, int reserved);
+	void SST(__CONTEXT *context, int reserved);
+	void ARG(__CONTEXT *context, int reserved);
+
+	void KW_SET(__CONTEXT *context, int reserved);
+	void KW_STDIN(__CONTEXT *context, int reserved);	
 #endif

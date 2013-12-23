@@ -1,0 +1,131 @@
+ ,--------------------------------------------------------------------------,               
+ |            ___           ___          _ _   ___                          |
+ |           / __| ___ __ _| __|_ _ _  _| | |_| _ \_ _ ___  __ _            |
+ |           \__ \/ -_) _` | _/ _` | || | |  _|  _/ '_/ _ \/ _` |           |
+ |           |___/\___\__, |_|\__,_|\_,_|_|\__|_| |_| \___/\__, |           |
+ |                    |___/                                |___/            |
+ |                                                                          |
+ '--------------------------------------------------------------------------'               
+   |                                                                      |
+   |   http://depotware-network.net  <tixlegeek@whoarehackers.com>        |
+   |       http://www.tixlegeek.com ( @tixlegeek #SegFaultProg )          |
+   |                                                                      |
+   |                                --                                    |
+   |                                                                      |
+   |    This program is free software; you can redistribute it and/or     |
+   |    modify it under the terms of the GNU General Public License       |
+   |    as published by the Free Software Foundation; either version 3    |
+   |    of the License, or (at your option) any later version.            |
+   |    This program is distributed in the hope that it will be useful,   |
+   |    but WITHOUT ANY WARRANTY; without even the implied warranty of    |
+   |    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the     |
+   |    GNU General Public License for more details.                      |
+   |                                                                      |
+   |                 http://www.gnu.org/licenses/gpl.html                 |
+   |                                                                      |
+   '----------------------------------------------------------------------'
+	 
+SegFaultProg  2.0.0					  SegFaultProg 2.0.0
+
+NOM
+      segfaultprog
+
+VERSION
+		2.0.0
+      
+DESCRIPTION (tirée de la DOC d'époque )
+
+Pour comprendre le projet SegFaultProg, il faut remonter aux annÃ©es 2007/2008. 
+Tout Ã  commencÃ© dans un petit village de la plaine jurassienne, dans une 
+campagne rurale qui n'a strictement rien Ã  voir avec le fond de l'histoire.
+
+PassÃ© ces considÃ©rations rhÃ©toriques, le problÃ¨me peut Ãªtre dÃ©veloppÃ© :
+
+Quand on parle de programmation, on pense tout de suite au C ou Ã  l'assembleur 
+(du moins quand on sait de quoi on parle), voir au Lisp, au Perl, etc... Tous 
+ces langages, et les autres, ont leur lots de points forts, et de points 
+faibles, qui correspondent Ã  leur domaine d'utilisation respectifs.
+
+On peut facilement s'accorder sur un point : le langage parfait n'existe pas. 
+Le C et l'assembleur sont parfaits pour des applications puissantes, lÃ©gÃ¨res, 
+et pointues, mais ils ont la fÃ¢cheuse tendance de devoir Ãªtre compilÃ©s pour la 
+machine sur laquelle ils sont utilisÃ©s, ce qui les rends au final assez peut 
+souples en terme de partage et de portabilitÃ© instantanÃ©e.
+
+On peut alors se tourner vers des langages en machine virtuelle, comme le Java, 
+le Python, le Ruby... Mais trÃ¨s vite, les besoins considÃ©rables de ces langages
+en terme de ressource Ã©vincent toute une gamme de supports trÃ¨s utilisÃ©s dans 
+les domaines du bricolage, ou du DIY.
+
+Le SegFaultProg est destinÃ© Ã  ce genre d'applications. Il utilise une Machine 
+virtuelle applicative simple et lÃ©gÃ¨re. C'est un langage dÃ©rivÃ© du BrainFuck, 
+un langage minimaliste trÃ¨s peut ergonomique permettant une gestion efficace
+d'un systÃ¨me logique de base (une zone de mÃ©moire, un pointeur, et des 
+instructions d'EntrÃ©e/Sortie), et y intÃ¨gre un jeu d'instruction plus lÃ©ger, 
+plus ergonomique, tout en conservant son cotÃ© Â« bas niveau Â», et sa simplicitÃ© 
+d'interprÃ©tation.
+
+NOTES
+	
+	
+
+INSTRUCTIONS
+	> (OPTIONS)		
+		: IncrÃ©mente le pointeur mÃ©moire (de OPTION cases)
+		
+	< (OPTIONS)
+		: DÃ©crÃ©mente le pointeur mÃ©moire (de OPTION cases)
+		
+	* [ARGUMENT]
+		: Place le pointeur Ã  l'adresse ARGUMENT
+		
+	+ (OPTIONS)
+		: IncrÃ©mente la valeur de l'octet (de OPTION unitÃ©s)
+		
+	- (OPTIONS)
+		: DÃ©crÃ©mente la valeur de l'octet (de OPTION unitÃ©s)
+		
+	[		
+		: Commence une boucle
+		
+	]			
+		: Retour au [ correspondant si la valeur de l'octet courant est 
+		nulle
+		
+	.
+		: Ecrit la valeur de l'octet courant sur la sortie.
+		
+	,	
+		: Demande une saisie utilisateur
+		
+x	! [ARGUMENT]
+		: RÃ©servÃ© pour les instructions spÃ©cifiques 
+		
+x	#
+		: RÃ©servÃ© pour les instructions de configuration
+									--- ERRATA 02/10/10
+x	(	
+		: CrÃ©ation d'une subroutine.
+
+x	)	
+		: Equivalent de "return()" met fin Ã  une subroutine.
+
+x	:	
+		: Appel d'une subroutine.
+
+	------------------------------------------------------------------------
+	x: instructions non implÃ©mentÃ©es dans cette distriution.
+	
+FICHIERS
+		./sfp_core.c 
+		./sfp_core.h
+		
+AUTHORS
+	G.DUBIEF Tixlegeek <tixlegeek@whoarehackers.com> http://www.tixlegeek.com
+
+TRADUCTION
+	fr seulement.
+
+
+sfp_vma                         23-08-10                      SegFaultProg 2.0.0
+

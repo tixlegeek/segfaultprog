@@ -106,7 +106,7 @@ ARGUMENTS
 		: La valeur de l'argument est l'expression de "valeur".
 			
 			ex: '+$0x0A$' -> incrémente la valeur de l'octet de 0x0A
-	$valeur$;
+	&valeur&;
 		: La valeur contenue dans le pointeur à l'adresse "valeur".
 			
 			ex: '*$1$+$10$>[-]+&0x0A&' -> incrémente la valeur de l'octet de 10

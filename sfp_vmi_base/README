@@ -70,20 +70,20 @@ NOTES
 	
 
 INSTRUCTIONS
-	> (OPTIONS)		
-		: IncrÃ©mente le pointeur mÃ©moire (de OPTION cases)
+	> [ARGUMENT]		
+		: IncrÃ©mente le pointeur mÃ©moire (de [ARGUMENT] cases)
 		
-	< (OPTIONS)
-		: DÃ©crÃ©mente le pointeur mÃ©moire (de OPTION cases)
+	< [ARGUMENT]
+		: DÃ©crÃ©mente le pointeur mÃ©moire (de [ARGUMENT] cases)
 		
 	* [ARGUMENT]
 		: Place le pointeur Ã  l'adresse ARGUMENT
 		
-	+ (OPTIONS)
-		: IncrÃ©mente la valeur de l'octet (de OPTION unitÃ©s)
+	+ [ARGUMENT]
+		: IncrÃ©mente la valeur de l'octet (de [ARGUMENT] unitÃ©s)
 		
-	- (OPTIONS)
-		: DÃ©crÃ©mente la valeur de l'octet (de OPTION unitÃ©s)
+	- [ARGUMENT]
+		: DÃ©crÃ©mente la valeur de l'octet (de [ARGUMENT] unitÃ©s)
 		
 	[		
 		: Commence une boucle
@@ -98,21 +98,34 @@ INSTRUCTIONS
 	,	
 		: Demande une saisie utilisateur
 		
-x	! [ARGUMENT]
-		: RÃ©servÃ© pour les instructions spÃ©cifiques 
+	%[KEYWORD] [ARGUMENT[s]]%
+		: Appelle des routines définies au niveau du code.
+
+ARGUMENTS
+	$valeur$;
+		: La valeur de l'argument est l'expression de "valeur".
+			
+			ex: '+$0x0A$' -> incrémente la valeur de l'octet de 0x0A
+	$valeur$;
+		: La valeur contenue dans le pointeur à l'adresse "valeur".
+			
+			ex: '*$1$+$10$>[-]+&0x0A&' -> incrémente la valeur de l'octet de 10
+	cX
+		: La valeur ascii de X
 		
-x	#
-		: RÃ©servÃ© pour les instructions de configuration
-									--- ERRATA 02/10/10
-x	(	
-		: CrÃ©ation d'une subroutine.
+	
+			ex: '+cA' -> incrémente la valeur de 61
 
-x	)	
-		: Equivalent de "return()" met fin Ã  une subroutine.
-
-x	:	
-		: Appel d'une subroutine.
-
+	Remarque:
+	
+		Les valeurs numériques peuvent être saisie dans les formats décimaux, 
+		hexadécimaux, ou octaux. Le type est défini en fonction de la forme
+		du nombre. ex: 
+		
+			$0x10$		Hexa
+			$10$		Décimal
+			$010$		Octal
+				
 	------------------------------------------------------------------------
 	x: instructions non implÃ©mentÃ©es dans cette distriution.
 	

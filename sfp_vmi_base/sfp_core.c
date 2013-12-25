@@ -25,6 +25,10 @@
    |                 http://www.gnu.org/licenses/gpl.html                 |
    |                                                                      |
    '----------------------------------------------------------------------'
+   Filename: sfp_core.c:
+   Description: Main source file, containing most of the functions.
+  
+   
 */	 
 #include "./sfp_core.h"
 
@@ -38,7 +42,7 @@ struct __INST {
   {'%', ARG},   {'\0', NULL} 
 };
 
-// Jeu d'instruction
+// Jeu de mots-clef
 struct __KEYWORD { 
   char *keyword;
   void (*ptr)(__CONTEXT *context, int reserved);
@@ -78,7 +82,7 @@ void _bf_Exec(__CONTEXT *context)
 	{
 		if(!__ABORT)
 		{
-			(*table[_bf_GetFn( _CODE_SYMBOLE)].ptr)(context,0);
+			(*table[_bf_GetFn(_CODE_SYMBOLE)].ptr)(context,0);
 			_CODE_PTR+=1;
 		}
 		else
@@ -86,7 +90,6 @@ void _bf_Exec(__CONTEXT *context)
 			exit(1);
 		}
 	}
-	//printf("%s", _CODE_BUFFER);
 }
 
 // Renvoie l'ID d'une instruction
@@ -108,50 +111,50 @@ unsigned int getMsTime()
     return  currenttime.tv_sec + currenttime.tv_usec/1000000.0;
 }
 
-// NOP
+// NOP ()
 void NOP(__CONTEXT *context, int reserved){ }
 
-// IncrementStackAdress
+// IncrementStackAdress (>)
 void ISA(__CONTEXT *context, int reserved)
 {
-	int value = isArgNext();
+	int value = argTest();
 	_STACK_PTR+=value;
 }
 
-// DecrementStackAdress
+// DecrementStackAdress (<)
 void DSA(__CONTEXT *context, int reserved)
 {
-	int value = isArgNext();
+	int value = argTest();
 	_STACK_PTR-=value;
 }
 
-// IncrementStackValue
+// IncrementStackValue (+)
 void ISV(__CONTEXT *context, int reserved)
 {
-	int value = isArgNext();
+	int value = argTest();
 	if(_STACK_SYMBOLE<255)
 		_STACK_SYMBOLE+=value;
 }
 
-// DecrementStackValue
+// DecrementStackValue (-)
 void DSV(__CONTEXT *context, int reserved)
 {
-	int value = isArgNext();
+	int value = argTest();
 	if(_STACK_SYMBOLE>0)
 		_STACK_SYMBOLE-=value;
 }
 
-// Start loop
+// Start loop([)
 void DBK(__CONTEXT *context, int reserved)
 {
 	_LOOP_SYMBOLE=_CODE_PTR-1;
 	_LOOP_PTR+=1;
 }
 
-// End loop
+// End loop (][
 void EBK(__CONTEXT *context, int reserved)
 {
-	int value = isArgNext()-1;
+	int value = argTest()-1;
 	if(__TIME - context->bf_watchdog < WATCHDOG)
 	{
 		if(_STACK_SYMBOLE>value)
@@ -174,7 +177,7 @@ void EBK(__CONTEXT *context, int reserved)
 //	Set Stack ptr To (*)
 void SST(__CONTEXT *context, int reserved)
 {
-	int value = isArgNext();
+	int value = argTest();
 	if((value>0) && (value<SBMAX))
 	{
 		_STACK_PTR = value;
@@ -182,19 +185,35 @@ void SST(__CONTEXT *context, int reserved)
 
 }
 
+// Ecrit sur la sortie  (PAS FINI)
+void PRN(__CONTEXT *context, int reserved)
+{
+	unsigned char value=_STACK_SYMBOLE;
+	/*if((value>=32)&&( value<127))
+	{
+		fprintf(stdout, "%c",value);
+	}
+	else
+	{
+		fprintf(stdout, "%d",value);
+	}*/
+	fprintf(stdout, "%c",value);
+}
+// Lit sur la sortie (PAS FINI)
+void GET(__CONTEXT *context, int reserved)
+{}
+
 // Appel des routines liées au KeyWords
 void ARG(__CONTEXT *context, int reserved)
 {	
 	int i=0;
-	char *arg = getNextArg(_KW_DELIMITER);
+	char *arg = _arg_Get(_KW_DELIMITER);
 	if(arg!=NULL)
 	{
 		while (keywords[i].keyword)
 		{
-			//printf("\n\t(testing %s)\n", keywords[i].keyword);
 			if(!FAST_STRCMP(arg, keywords[i].keyword))
 			{
-				//printf("\n\t(calling %s)\n", keywords[i].keyword);
 				(*keywords[i].ptr)(context,0);
 				break;
 			}
@@ -204,11 +223,11 @@ void ARG(__CONTEXT *context, int reserved)
 }
 
 // KeyWords
-
+// (PAS FINI)
 void  KW_SET(__CONTEXT *context, int reserved)
 {
 	int PULL_CODE_PTR = _CODE_PTR;
-	char *arg = getNextArg(_ARG_DELIMITER);
+	char *arg = _arg_Get(_ARG_DELIMITER);
 	char *key = NULL;
 	char *value = NULL;
 	if(arg!=NULL)
@@ -216,8 +235,10 @@ void  KW_SET(__CONTEXT *context, int reserved)
 		if(strchr(arg,'='))
 		{
 			_CODE_PTR = PULL_CODE_PTR;
-			key = getNextArg('=');
-			value = getNextArg(';');
+			// Cle
+			key = _arg_Get('=');
+			// Valeur
+			value = _arg_Get('%');
 			if((key!=NULL) && (value!=NULL))
 			{
 				//printf("<%s=%s>", key, value);
@@ -241,14 +262,14 @@ void  KW_SET(__CONTEXT *context, int reserved)
 void  KW_STDIN(__CONTEXT *context, int reserved)
 {
 	int PULL_CODE_PTR = _CODE_PTR;
-	char *arg = getNextArg(_ARG_DELIMITER);
+	char *arg = _arg_Get(_ARG_DELIMITER);
 	char *key = NULL;
 	char *value = NULL;
 	if(arg!=NULL)
 	{
 		_CODE_PTR = PULL_CODE_PTR;
-		key = getNextArg(' ');
-		value = strtol (getNextArg(_ARG_DELIMITER), NULL, 0);
+		key = _arg_Get(' ');
+		value = _arg_Get(_ARG_DELIMITER);
 		if((key!=NULL) && (value!=NULL))
 		{
 			if(!FAST_STRCMP(key, "addr"))
@@ -267,14 +288,14 @@ void  KW_STDIN(__CONTEXT *context, int reserved)
 void  KW_STDOUT(__CONTEXT *context, int reserved)
 {
 	int PULL_CODE_PTR = _CODE_PTR;
-	char *arg = getNextArg(_ARG_DELIMITER);
+	char *arg = _arg_Get(_ARG_DELIMITER);
 	char *key = NULL;
 	char *value = NULL;
 	if(arg!=NULL)
 	{
 		_CODE_PTR = PULL_CODE_PTR;
-		key = getNextArg(' ');
-		value = strtol (getNextArg(_ARG_DELIMITER), NULL, 0);
+		key = 	trim(_arg_Get(' '));
+		value = trim(_arg_Get(_ARG_DELIMITER));
 		if((key!=NULL) && (value!=NULL))
 		{
 			if(!FAST_STRCMP(key, "addr"))
@@ -289,24 +310,8 @@ void  KW_STDOUT(__CONTEXT *context, int reserved)
 	}
 }
 
-void PRN(__CONTEXT *context, int reserved)
-{
-	unsigned char value=_STACK_SYMBOLE;
-	/*if((value>=32)&&( value<127))
-	{
-		fprintf(stdout, "%c",value);
-	}
-	else
-	{
-		fprintf(stdout, "%d",value);
-	}*/
-	fprintf(stdout, "%c",value);
-}
-
-void GET(__CONTEXT *context, int reserved)
-{}
-
-char *getNextArg( char delimiter)
+// Renvoie la veleur s'il y en a un.
+char *_arg_Get( char delimiter)
 {
 	char *arg = NULL, i=0;
 	char arglen = 0;
@@ -334,7 +339,9 @@ char *getNextArg( char delimiter)
 	}
 }
 
-int isArgNext()
+// S'il y a un argument (type défini), cette fonction le met en forme et
+// le retourne.
+int _arg_Test()
 {
 	_CODE_PTR +=1;
 	int buffer;
@@ -343,8 +350,9 @@ int isArgNext()
 	{
 		switch(*token)
 		{
-			case '&':
-				buffer = strtol (getNextArg(_ARG_DELIMITER), NULL, 0);
+			// Valeurs stoquées dans la stack à l'adresse ***
+			case _ARG_DELIM_PTR:
+				buffer = strtol (_arg_Get(_ARG_DELIM_PTR), NULL, 0);
 				if((buffer >= 0) && (buffer < SBMAX))
 				{
 					return *(_STACK_BUFFER + buffer);
@@ -354,10 +362,12 @@ int isArgNext()
 					return 0;
 				}
 			break;
-			case '$':
-				return strtol (getNextArg(_ARG_DELIMITER), NULL, 0);
+			// Valeurs numériques
+			case _ARG_DELIM_VAL:
+				return strtol (_arg_Get(_ARG_DELIM_VAL), NULL, 0);
 			break;
-			case 'c':
+			// Caractère ascii
+			case _ARG_DELIM_CHR:
 				_CODE_PTR++;
 				return (int)_CODE_SYMBOLE;
 			break;
@@ -368,11 +378,13 @@ int isArgNext()
 	}
 	else
 	{
+		// Si aucun argument n'est détecté...
 		_CODE_PTR -=1;
 		return 1;
 	}
 }
 
+// Trim ..
 char *trim(char *s) 
 {
     char *ptr;

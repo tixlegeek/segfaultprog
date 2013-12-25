@@ -53,7 +53,12 @@
 
 	//
 	#define _ARG_MAX_SIZE 20
+	
 	#define _ARG_DELIMITER ';'
+	#define _ARG_DELIM_CHR 'c'
+	#define _ARG_DELIM_VAL '$'
+	#define _ARG_DELIM_PTR '&'
+	#define _ARG_DELIM_STR '"'
 	
 	#define _KW_MAX_SIZE 20
 	#define _KW_DELIMITER ' '
@@ -64,8 +69,6 @@
 	#define __ABORT context->bf_abort
 	
 	// Variables globales
-
-	
 	// Structure de pile (buffer+ptr)
 	typedef struct __STACK { 
 		unsigned int ptr;
@@ -96,11 +99,15 @@
 	// Fonctions d'exécution
 	void _bf_Exec(__CONTEXT *context);
 	int _bf_GetFn(char mnemonic);
-	char *getNextArg( char delimiter);
-	int isArgNext();
+	// Fonctions à propos des arguments.
+	char *_arg_Get( char delimiter);
+	int _arg_Test();
+	
+	// Fonctions système
 	unsigned int getMsTime();
 	char *trim(char *s);
-	// Commandes BF
+
+	// Instructions
 	void NOP(__CONTEXT *context, int reserved);
 	void ISA(__CONTEXT *context, int reserved);
 	void DSA(__CONTEXT *context, int reserved);
@@ -113,6 +120,8 @@
 	void SST(__CONTEXT *context, int reserved);
 	void ARG(__CONTEXT *context, int reserved);
 
+	// Commandes "mots clef"
 	void KW_SET(__CONTEXT *context, int reserved);
-	void KW_STDIN(__CONTEXT *context, int reserved);	
+	void KW_STDIN(__CONTEXT *context, int reserved);
+	void KW_STDOUT(__CONTEXT *context, int reserved);
 #endif

@@ -27,6 +27,9 @@
    '----------------------------------------------------------------------'
    Filename: sfp_core.c:
    Description: Main source file, containing most of the functions.
+   Author: Tixlegeek <tixlegeek@whoarehackers.com> @tixlegeek
+   
+   http://www.github.com/tixlegeek/segfaultprog/
   
    
 */	 

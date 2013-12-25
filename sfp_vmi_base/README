@@ -25,7 +25,7 @@
    |                                                                      |
    '----------------------------------------------------------------------'
 	 
-SegFaultProg  2.0.0					  SegFaultProg 2.0.0
+SegFaultProg  2.0.0					                          SegFaultProg 2.0.0
 
 NOM
       segfaultprog
@@ -140,5 +140,5 @@ TRADUCTION
 	fr seulement.
 
 
-sfp_vma                         23-08-10                      SegFaultProg 2.0.0
+sfp_vma                       25-12-2013                      SegFaultProg 2.0.0
 

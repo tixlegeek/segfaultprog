@@ -117,21 +117,21 @@ void NOP(__CONTEXT *context, int reserved){ }
 // IncrementStackAdress (>)
 void ISA(__CONTEXT *context, int reserved)
 {
-	int value = argTest();
+	int value = _arg_Test();
 	_STACK_PTR+=value;
 }
 
 // DecrementStackAdress (<)
 void DSA(__CONTEXT *context, int reserved)
 {
-	int value = argTest();
+	int value = _arg_Test();
 	_STACK_PTR-=value;
 }
 
 // IncrementStackValue (+)
 void ISV(__CONTEXT *context, int reserved)
 {
-	int value = argTest();
+	int value = _arg_Test();
 	if(_STACK_SYMBOLE<255)
 		_STACK_SYMBOLE+=value;
 }
@@ -139,7 +139,7 @@ void ISV(__CONTEXT *context, int reserved)
 // DecrementStackValue (-)
 void DSV(__CONTEXT *context, int reserved)
 {
-	int value = argTest();
+	int value = _arg_Test();
 	if(_STACK_SYMBOLE>0)
 		_STACK_SYMBOLE-=value;
 }
@@ -154,7 +154,7 @@ void DBK(__CONTEXT *context, int reserved)
 // End loop (][
 void EBK(__CONTEXT *context, int reserved)
 {
-	int value = argTest()-1;
+	int value = _arg_Test()-1;
 	if(__TIME - context->bf_watchdog < WATCHDOG)
 	{
 		if(_STACK_SYMBOLE>value)
@@ -177,7 +177,7 @@ void EBK(__CONTEXT *context, int reserved)
 //	Set Stack ptr To (*)
 void SST(__CONTEXT *context, int reserved)
 {
-	int value = argTest();
+	int value = _arg_Test();
 	if((value>0) && (value<SBMAX))
 	{
 		_STACK_PTR = value;
@@ -241,7 +241,7 @@ void  KW_SET(__CONTEXT *context, int reserved)
 			value = _arg_Get('%');
 			if((key!=NULL) && (value!=NULL))
 			{
-				//printf("<%s=%s>", key, value);
+				printf("\n SET [ %s = %s ]>", key, value);
 			}
 			else
 			{

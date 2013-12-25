@@ -40,9 +40,19 @@ struct __INST {
   unsigned char code;
   void (*ptr)(__CONTEXT *context, int reserved);
 } table[] = { 
-  {' ', NOP},	{'>', ISA},	{'<', DSA},	{'.', PRN},	{',', GET},
-  {'+', ISV},	{'-', DSV},	{'[', DBK},	{']', EBK},	{'*', SST},
-  {'%', ARG},   {'\0', NULL} 
+	{' ', NOP},
+	// Déplacement du pointeur
+	{'>', ISA},	{'<', DSA},	{'*', SST},	
+	// Entrée/Sortie
+	{'.', PRN},	{',', GET},
+	// Incrément/Décrément
+	{'+', ISV},	{'-', DSV},	
+	// Boucles
+	{'[', DBK},	{']', EBK},	
+	// SubRoutines
+	{'{', DSR},	{'}', SSR},
+	
+	{'%', ARG},   {'\0', NULL} 
 };
 
 // Jeu de mots-clef
@@ -175,7 +185,26 @@ void EBK(__CONTEXT *context, int reserved)
 	{
 		context->bf_abort=1;
 	}
+}
 
+//	Début de subroutine
+void DSR(__CONTEXT *context, int reserved)
+{
+	int value = _arg_Test();
+	if((value>0) && (value<SBMAX))
+	{
+		_STACK_PTR = value;
+	}
+}
+
+//	Fin de subroutine
+void SSR(__CONTEXT *context, int reserved)
+{
+	int value = _arg_Test();
+	if((value>0) && (value<SBMAX))
+	{
+		_STACK_PTR = value;
+	}
 }
 //	Set Stack ptr To (*)
 void SST(__CONTEXT *context, int reserved)
@@ -185,7 +214,6 @@ void SST(__CONTEXT *context, int reserved)
 	{
 		_STACK_PTR = value;
 	}
-
 }
 
 // Ecrit sur la sortie  (PAS FINI)

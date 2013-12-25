@@ -119,6 +119,8 @@
 	void GET(__CONTEXT *context, int reserved);
 	void SST(__CONTEXT *context, int reserved);
 	void ARG(__CONTEXT *context, int reserved);
+	void DSR(__CONTEXT *context, int reserved);
+	void SSR(__CONTEXT *context, int reserved);
 
 	// Commandes "mots clef"
 	void KW_SET(__CONTEXT *context, int reserved);

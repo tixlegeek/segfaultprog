@@ -54,7 +54,7 @@
 	//
 	#define _ARG_MAX_SIZE 20
 	
-	#define _ARG_DELIMITER ';'
+	#define _ARG_DELIMITER '%'
 	#define _ARG_DELIM_CHR 'c'
 	#define _ARG_DELIM_VAL '$'
 	#define _ARG_DELIM_PTR '&'

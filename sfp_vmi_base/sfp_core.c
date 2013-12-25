@@ -157,7 +157,7 @@ void DBK(__CONTEXT *context, int reserved)
 // End loop (][
 void EBK(__CONTEXT *context, int reserved)
 {
-	int value = _arg_Test()-1;
+	int value = _arg_Test();
 	if(__TIME - context->bf_watchdog < WATCHDOG)
 	{
 		if(_STACK_SYMBOLE>value)
@@ -241,7 +241,7 @@ void  KW_SET(__CONTEXT *context, int reserved)
 			// Cle
 			key = _arg_Get('=');
 			// Valeur
-			value = _arg_Get('%');
+			value = _arg_Get(_ARG_DELIMITER);
 			if((key!=NULL) && (value!=NULL))
 			{
 				printf("\n SET [ %s = %s ]>", key, value);

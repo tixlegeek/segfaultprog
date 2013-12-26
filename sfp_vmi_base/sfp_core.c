@@ -28,9 +28,8 @@
    Filename: sfp_core.c:
    Description: Main source file, containing most of the functions.
    Author: Tixlegeek <tixlegeek@whoarehackers.com> @tixlegeek
+   Repo: http://www.github.com/tixlegeek/segfaultprog/
    
-   http://www.github.com/tixlegeek/segfaultprog/
-  
    
 */	 
 #include "./sfp_core.h"
@@ -187,25 +186,6 @@ void EBK(__CONTEXT *context, int reserved)
 	}
 }
 
-//	Début de subroutine
-void DSR(__CONTEXT *context, int reserved)
-{
-	int value = _arg_Test();
-	if((value>0) && (value<SBMAX))
-	{
-		_STACK_PTR = value;
-	}
-}
-
-//	Fin de subroutine
-void SSR(__CONTEXT *context, int reserved)
-{
-	int value = _arg_Test();
-	if((value>0) && (value<SBMAX))
-	{
-		_STACK_PTR = value;
-	}
-}
 //	Set Stack ptr To (*)
 void SST(__CONTEXT *context, int reserved)
 {
@@ -216,6 +196,41 @@ void SST(__CONTEXT *context, int reserved)
 	}
 }
 
+/*
+				Topic sur la gestion des IOs:
+				-----------------------------
+	La gestion des IOs est problématique, puis-ce que la VMA doit 
+	impérativement être la plus "portable" possible. Les quelques 
+	réflexions que j'ai eu me laissent supposer que ce sera probablement
+	la partie la plus acrobatique de toute la VM.
+	
+	Très clairement, produire un code tout à fait portable d'emblée sera
+	problématique. Techniquement, il n'est pas possible de configurer
+	un périphérique d'E:S générique pour toute forme de système logique.
+	
+	J'ai donc décidé de créer deux mots clef permettant de configurer 
+	grossièrement le type et le mode de périphérique par défaut, et de
+	le reconfigurer selon les ressources disponibles sur la plateforme.
+	
+	%stdout mode iface%
+	%stdin mode iface%
+	
+	Il sera donc possible de choisir le type d'ES (et son mode d'accès)
+	ainsi que son "adresse"	(interface)
+	
+	Par exemple, écrire un octet dans un registre (config IO, ...) devrait
+	ressembler à :
+	
+		%stdout <TYPE> $<ADRESS>$%			# Configuration de stdout
+		*$0x00$[-]+$0x08$					# Variable contenant la valeur
+											# à envoyer
+		*$<ADRESS>$+&0x00&					# Écriture
+	
+	Ce qui devrait laisser une bonne marge de manoeuvre à l'utilisation
+	de pas mal de périphériques. J'attends de meilleurs suggestions :]
+	
+
+*/
 // Ecrit sur la sortie  (PAS FINI)
 void PRN(__CONTEXT *context, int reserved)
 {
@@ -230,9 +245,38 @@ void PRN(__CONTEXT *context, int reserved)
 	}*/
 	fprintf(stdout, "%c",value);
 }
-// Lit sur la sortie (PAS FINI)
+// Lit sur la sortie [TODO]
 void GET(__CONTEXT *context, int reserved)
 {}
+
+
+/*
+				Topic sur les subroutines:	
+				--------------------------
+	Les subroutines ne sont pas encore implémentées. Le but est
+	d'associer un morceau de code à une étiquette, qu'il sera possible
+	d'appelé. Les arguments d'entrée seront toujours situés à l'emplacement
+	courant du curseur de la stack au moment de l'appel de la routine,
+	et le résultat placé à l'endroit ou se trouve le curseur de la stack
+	au moment du return. La syntaxe sera la suivante:
+		{etiquette @code}
+	et l'appel se fera de telle sorte:
+		@etiquette@
+
+*/
+
+//	Début de subroutine	[TODO]
+void DSR(__CONTEXT *context, int reserved)
+{
+
+}
+
+//	Fin de subroutine	[TODO]
+void SSR(__CONTEXT *context, int reserved)
+{
+
+	
+}
 
 // Appel des routines liées au KeyWords
 void ARG(__CONTEXT *context, int reserved)
@@ -251,6 +295,7 @@ void ARG(__CONTEXT *context, int reserved)
 			i++;
 		}
 	}
+	free(arg);
 }
 
 // KeyWords
@@ -288,6 +333,9 @@ void  KW_SET(__CONTEXT *context, int reserved)
 	{
 		//printf("BAD KEYWORD USAGE");
 	}
+	free(arg);
+	free(key);
+	free(value);
 }
 //	Set stdin way
 void  KW_STDIN(__CONTEXT *context, int reserved)
@@ -313,6 +361,9 @@ void  KW_STDIN(__CONTEXT *context, int reserved)
 			}
 		}
 	}
+	free(arg);
+	free(key);
+	free(value);
 }
 
 //	Set stdout way
@@ -339,6 +390,9 @@ void  KW_STDOUT(__CONTEXT *context, int reserved)
 			}
 		}
 	}
+	free(arg);
+	free(key);
+	free(value);
 }
 
 // Renvoie la veleur s'il y en a un.
@@ -368,6 +422,8 @@ char *_arg_Get( char delimiter)
 	{
 		return NULL;
 	}
+
+
 }
 
 // S'il y a un argument (type défini), cette fonction le met en forme et
@@ -375,18 +431,22 @@ char *_arg_Get( char delimiter)
 int _arg_Test()
 {
 	_CODE_PTR +=1;
-	int buffer;
 	char *token = strchr("$&c",_CODE_SYMBOLE);
+	char n = 0, *m = 0;
 	if (token!=NULL)
 	{
 		switch(*token)
 		{
 			// Valeurs stoquées dans la stack à l'adresse ***
 			case _ARG_DELIM_PTR:
-				buffer = strtol (_arg_Get(_ARG_DELIM_PTR), NULL, 0);
-				if((buffer >= 0) && (buffer < SBMAX))
+				free(token);
+				m = _arg_Get(_ARG_DELIM_PTR);
+				n = strtol (m, NULL, 0);
+				free(m);
+				
+				if((n >= 0) && (n < SBMAX))
 				{
-					return *(_STACK_BUFFER + buffer);
+					return *(_STACK_BUFFER + n);
 				}
 				else
 				{
@@ -395,14 +455,18 @@ int _arg_Test()
 			break;
 			// Valeurs numériques
 			case _ARG_DELIM_VAL:
-				return strtol (_arg_Get(_ARG_DELIM_VAL), NULL, 0);
+				free(token);
+				m = _arg_Get(_ARG_DELIM_VAL);
+				return strtol (m, NULL, 0);
 			break;
 			// Caractère ascii
 			case _ARG_DELIM_CHR:
+				free(token);
 				_CODE_PTR++;
 				return (int)_CODE_SYMBOLE;
 			break;
 			default:
+				free(token);
 				return 1;
 			break;
 		}
@@ -410,6 +474,7 @@ int _arg_Test()
 	else
 	{
 		// Si aucun argument n'est détecté...
+		free(token);
 		_CODE_PTR -=1;
 		return 1;
 	}

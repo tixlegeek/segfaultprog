@@ -255,7 +255,7 @@ void GET(__CONTEXT *context, int reserved)
 				--------------------------
 	Les subroutines ne sont pas encore implémentées. Le but est
 	d'associer un morceau de code à une étiquette, qu'il sera possible
-	d'appelé. Les arguments d'entrée seront toujours situés à l'emplacement
+	d'appeler. Les arguments d'entrée seront toujours situés à l'emplacement
 	courant du curseur de la stack au moment de l'appel de la routine,
 	et le résultat placé à l'endroit ou se trouve le curseur de la stack
 	au moment du return. La syntaxe sera la suivante:

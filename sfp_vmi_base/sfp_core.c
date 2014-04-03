@@ -196,6 +196,86 @@ void SST(__CONTEXT *context, int reserved)
 	}
 }
 
+char *_arg_Get(char d)
+{
+	size_t arglen = 0;
+	char *argstr = NULL;
+	char *delim = malloc(sizeof(char));
+	*delim = d;
+	
+	arglen = strcspn ((_CODE_STR+1) ,delim);
+	argstr = malloc((size_t)(arglen*sizeof(char)));
+	if(argstr!=NULL)
+	{
+		memcpy(argstr, (_CODE_STR+1), arglen);
+		free(delim);
+		_CODE_PTR += arglen;
+		return argstr;
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+// S'il y a un argument (type défini), cette fonction le met en forme et
+// le retourne.
+int _arg_Test()
+{
+	_CODE_PTR +=1;
+	char stackptr = 0;
+	char *arg = NULL;
+	int returned=1;
+	
+	// Est-on à la fin du code?
+	if(_CODE_SYMBOLE == (char)'\0')
+	{
+		// On replace le pointeur à son emplacement initial
+		_CODE_PTR -= 1;
+	}
+	else
+	{
+		// On commence à analyser l'éventuel argument.
+		switch(_CODE_SYMBOLE)
+		{
+			case _ARG_DELIM_PTR:
+				stackptr = strtol (_arg_Get(_ARG_DELIM_PTR), NULL, 0);
+				if(stackptr<SBMAX)
+				{
+					returned =  *(stackptr + _STACK_BUFFER);
+				}
+				else
+				{
+					returned =  0;
+				}
+			break;
+			// Valeurs numériques
+			case _ARG_DELIM_VAL:
+				returned =  strtol (_arg_Get(_ARG_DELIM_VAL), NULL, 0);	
+
+			break;
+			// Caractère ascii
+			case _ARG_DELIM_CHR:
+				arg = _arg_Get(_ARG_DELIM_CHR);
+				if(arg!=NULL)
+				{
+					returned =  (int)arg[0];
+				}
+				else
+				{
+					returned = 0;
+				}
+				
+			break;
+			default:
+				_CODE_PTR -= 1;
+			break;
+		}
+		return returned;
+	}
+}
+
+
 /*
 				Topic sur la gestion des IOs:
 				-----------------------------
@@ -281,7 +361,7 @@ void SSR(__CONTEXT *context, int reserved)
 // Appel des routines liées au KeyWords
 void ARG(__CONTEXT *context, int reserved)
 {	
-	int i=0;
+	/*int i=0;
 	char *arg = _arg_Get(_KW_DELIMITER);
 	if(arg!=NULL)
 	{
@@ -295,14 +375,14 @@ void ARG(__CONTEXT *context, int reserved)
 			i++;
 		}
 	}
-	free(arg);
+	free(arg);*/
 }
 
 // KeyWords
 // (PAS FINI)
 void  KW_SET(__CONTEXT *context, int reserved)
 {
-	int PULL_CODE_PTR = _CODE_PTR;
+	/*int PULL_CODE_PTR = _CODE_PTR;
 	char *arg = _arg_Get(_ARG_DELIMITER);
 	char *key = NULL;
 	char *value = NULL;
@@ -335,11 +415,11 @@ void  KW_SET(__CONTEXT *context, int reserved)
 	}
 	free(arg);
 	free(key);
-	free(value);
+	free(value);*/
 }
 //	Set stdin way
 void  KW_STDIN(__CONTEXT *context, int reserved)
-{
+{/*
 	int PULL_CODE_PTR = _CODE_PTR;
 	char *arg = _arg_Get(_ARG_DELIMITER);
 	char *key = NULL;
@@ -363,13 +443,13 @@ void  KW_STDIN(__CONTEXT *context, int reserved)
 	}
 	free(arg);
 	free(key);
-	free(value);
+	free(value);*/
 }
 
 //	Set stdout way
 void  KW_STDOUT(__CONTEXT *context, int reserved)
 {
-	int PULL_CODE_PTR = _CODE_PTR;
+	/*int PULL_CODE_PTR = _CODE_PTR;
 	char *arg = _arg_Get(_ARG_DELIMITER);
 	char *key = NULL;
 	char *value = NULL;
@@ -392,9 +472,9 @@ void  KW_STDOUT(__CONTEXT *context, int reserved)
 	}
 	free(arg);
 	free(key);
-	free(value);
+	free(value);*/
 }
-
+/*
 // Renvoie la veleur s'il y en a un.
 char *_arg_Get( char delimiter)
 {
@@ -402,83 +482,36 @@ char *_arg_Get( char delimiter)
 	char arglen = 0;
 
 	_CODE_PTR += 1;
-	arglen = (index((char*)(_CODE_BUFFER + _CODE_PTR), delimiter) - (char*)(_CODE_BUFFER + _CODE_PTR));
-	if(arglen < _ARG_MAX_SIZE)
+	if(_CODE_SYMBOLE)
 	{
-		arg = malloc(arglen * sizeof(char));
-		if(arg==NULL)
+		arglen = (index((char*)(_CODE_BUFFER + _CODE_PTR), delimiter) - (char*)(_CODE_BUFFER + _CODE_PTR));
+		if(arglen < _ARG_MAX_SIZE)
 		{
-			exit(0);
+			arg = malloc(arglen * sizeof(char));
+			if(arg==NULL)
+			{
+				exit(0);
+			}
+			for(i=0; i< arglen; i++)
+			{
+				*(arg+i) = _CODE_SYMBOLE;
+				_CODE_PTR++;
+			}
+			arg[i] = '\0';
+			return trim(arg);
 		}
-		for(i=0; i< arglen; i++)
+		else
 		{
-			*(arg+i) = _CODE_SYMBOLE;
-			_CODE_PTR++;
+			return NULL;
 		}
-		arg[i] = '\0';
-		return trim(arg);
 	}
 	else
 	{
+		_CODE_PTR -= 1;
 		return NULL;
 	}
 
-
-}
-
-// S'il y a un argument (type défini), cette fonction le met en forme et
-// le retourne.
-int _arg_Test()
-{
-	_CODE_PTR +=1;
-	char *token = strchr("$&c",_CODE_SYMBOLE);
-	char n = 0, *m = 0;
-	if (token!=NULL)
-	{
-		switch(*token)
-		{
-			// Valeurs stoquées dans la stack à l'adresse ***
-			case _ARG_DELIM_PTR:
-				free(token);
-				m = _arg_Get(_ARG_DELIM_PTR);
-				n = strtol (m, NULL, 0);
-				free(m);
-				
-				if((n >= 0) && (n < SBMAX))
-				{
-					return *(_STACK_BUFFER + n);
-				}
-				else
-				{
-					return 0;
-				}
-			break;
-			// Valeurs numériques
-			case _ARG_DELIM_VAL:
-				free(token);
-				m = _arg_Get(_ARG_DELIM_VAL);
-				return strtol (m, NULL, 0);
-			break;
-			// Caractère ascii
-			case _ARG_DELIM_CHR:
-				free(token);
-				_CODE_PTR++;
-				return (int)_CODE_SYMBOLE;
-			break;
-			default:
-				free(token);
-				return 1;
-			break;
-		}
-	}
-	else
-	{
-		// Si aucun argument n'est détecté...
-		free(token);
-		_CODE_PTR -=1;
-		return 1;
-	}
-}
+}*/
 
 // Trim ..
 char *trim(char *s) 

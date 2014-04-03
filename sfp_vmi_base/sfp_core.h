@@ -80,7 +80,8 @@
 		unsigned int bf_abort;
 	} __CONTEXT;
 	
-	#define _CODE_SYMBOLE *(__Code.stack + __Code.ptr)
+	#define _CODE_SYMBOLE (char)*(__Code.stack + __Code.ptr)
+		#define _CODE_STR (__Code.stack + __Code.ptr)
 		#define _CODE_BUFFER __Code.stack
 		#define _CODE_PTR __Code.ptr
 
@@ -100,7 +101,7 @@
 	void _bf_Exec(__CONTEXT *context);
 	int _bf_GetFn(char mnemonic);
 	// Fonctions à propos des arguments.
-	char *_arg_Get( char delimiter);
+	char *_arg_Get(char d);
 	int _arg_Test();
 	
 	// Fonctions système
